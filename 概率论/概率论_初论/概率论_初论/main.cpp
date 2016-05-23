@@ -280,7 +280,7 @@ int main()
                 compensateModel += chance[i];
             }
         }
-        cout << "补偿" << chanceI << "model: "  << (compensateModel * 1.78 - 4 * arrayMAX) << endl;
+        cout << "补偿" << chanceI + 1 << "model: "  << (compensateModel * 1.78 - 4 * arrayMAX) << endl;
     }
     
     zonggong = 0;
@@ -292,21 +292,30 @@ int main()
             }
             
             compensateModel = compensateModel * 1.78 - 4 * arrayMAX;
-            if (compensateModel < compensateData + 0.5 && compensateModel > compensateData - 0.5) {
+            if (compensateModel < compensateData + 0.1 && compensateModel > compensateData - 0.1) {
                 ++zonggong;
-                cout << "-----------------model--------------------" << endl;
+                //cout << "-----------------model--------------------" << endl;
                 for (int i = 0; i < arrayMAX; ++i) {
                     ++compensateMap[ite->fArray[i]];
-                    cout << ite->fArray[i] << " ";
+                    //cout << ite->fArray[i] << " ";
                 }
-                cout << compensateModel << endl;
+                //cout << compensateModel << endl;
             }
         }
     }
     
+    cout << endl;
+    int i = 1;
     for (vector<ProbabilityArray>::iterator ite = arrayVector.begin();
-         ite != arrayVector.end(); ++ite) {
-        
+         ite != arrayVector.end(); ++ite, ++i) {
+        cout << "模型" << i << endl;
+        cout << ite->victory << "，元概率：" << chanceMap[ite->victory];
+        chanceMap[ite->victory] = compensateMap[ite->victory] / zonggong * chanceMap[ite->victory];
+        cout << "；修正概率：" << chanceMap[ite->victory] << endl;
+        cout << ite->failure << "，元概率：" << chanceMap[ite->failure];
+        chanceMap[ite->failure] = compensateMap[ite->failure] / zonggong * chanceMap[ite->failure];
+        cout << "；修正概率：" << chanceMap[ite->failure] << endl;
+        cout << endl;
     }
     
     void InsertSql(float odds, int isVictory, int array[], bool isexec);
@@ -681,7 +690,7 @@ bool ExecSql(sqlite3 *database, string sql)
 void InsertSql(float odds, int isVictory, int array[], bool isexec)
 {
     sqlite3 *database;
-    int openDataBasesResult = sqlite3_open("/Users/houqingfeng/百度云同步盘/概率论/MemoryPalace.db", &database);
+    int openDataBasesResult = sqlite3_open("/Users/houqingfeng/Documents/Git/ProbabilityTheory/概率论/MemoryPalace.db", &database);
     if (openDataBasesResult != SQLITE_OK) {
         sqlite3_close(database);//关闭数据库
         cout << "打开数据库失败！" << endl;
