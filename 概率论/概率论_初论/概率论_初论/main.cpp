@@ -292,7 +292,7 @@ int main()
             }
             
             compensateModel = compensateModel * 1.78 - 4 * arrayMAX;
-            if (compensateModel < compensateData + 0.1 && compensateModel > compensateData - 0.1) {
+            if (compensateModel < compensateData + 0.5 && compensateModel > compensateData - 0.5) {
                 ++zonggong;
                 //cout << "-----------------model--------------------" << endl;
                 for (int i = 0; i < arrayMAX; ++i) {
@@ -332,12 +332,14 @@ int main()
         
         InsertSql(ite->victory, 0, array, false);
         cout << "odds: "<< ite->victory << ", history probablity: "
-        << ((float)array[0]/array[1]) * 100 << "%" << ", adjusted probablity: "
+        << ((float)array[0]/array[1]) * 100 << "%" << "(" << array[0] << "/" << array[1] << ")"
+        <<  ", adjusted probablity: "
         << ((float)array[0]/array[1]) * chanceMap[ite->victory] << "%" << endl;
         
         InsertSql(ite->failure, 0, array, false);
         cout << "odds: "<< ite->failure << ", history probablity: "
-        << ((float)array[0]/array[1]) * 100 << "%" << ", adjusted probablity: "
+        << ((float)array[0]/array[1]) * 100 << "%" << "(" << array[0] << "/" << array[1] << ")"
+        << ", adjusted probablity: "
         << ((float)array[0]/array[1]) * chanceMap[ite->failure] << "%" << endl << endl;
     }
     
