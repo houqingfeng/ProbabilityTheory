@@ -652,131 +652,129 @@ int main()
     cout << "    |                               |" << endl;
     cout << "    |         0:  no                |" << endl;
     cout << "    |         1:  yes               |" << endl;
+    cout << "    |         2:  continue          |" << endl;
     cout << "    _________________________________" << endl;
     cout << "----------------------------------------"<< endl;
     cin >> isUed;
-    if (!isUed) {
-        return 0;
-    }
-    
-    vector<ProbabilityArray> uedArrayVector;
-    vector<AllArrangeArray> uedArrangeArray;
-    vector<floatArray> uedOutcomeArray;
-    map<float, float>uedChanceMap;
-    
-    cout << "please input data(end with '-1'): " << endl;
-    while (1) {
-        float temp1;
-        cin >> temp1;
-        if(temp1 < 0)
-            break;
+    if (isUed){
+        vector<ProbabilityArray> uedArrayVector;
+        vector<AllArrangeArray> uedArrangeArray;
+        vector<floatArray> uedOutcomeArray;
+        map<float, float>uedChanceMap;
         
-        ProbabilityArray *arr = new ProbabilityArray();
-        
-        if (uedArrayVector.empty()) {
-            arr->victoryNum = 1;
-            arr->victory = temp1;
-            arr->failure = -1;
-        } else{
-            bool isV = false;
-            for (vector<ProbabilityArray>::iterator ite = uedArrayVector.begin(); ite != uedArrayVector.end(); ++ite) {
-                if (ite->victory == temp1) {
-                    ++ite->victoryNum;
-                    arr->victory = temp1 + 0.1 * pow(0.1, (ite->victoryNum));
-                    isV = true;
-                    break;
+        cout << "please input data(end with '-1'): " << endl;
+        while (1) {
+            float temp1;
+            cin >> temp1;
+            if(temp1 < 0)
+                break;
+            
+            ProbabilityArray *arr = new ProbabilityArray();
+            
+            if (uedArrayVector.empty()) {
+                arr->victoryNum = 1;
+                arr->victory = temp1;
+                arr->failure = -1;
+            } else{
+                bool isV = false;
+                for (vector<ProbabilityArray>::iterator ite = uedArrayVector.begin(); ite != uedArrayVector.end(); ++ite) {
+                    if (ite->victory == temp1) {
+                        ++ite->victoryNum;
+                        arr->victory = temp1 + 0.1 * pow(0.1, (ite->victoryNum));
+                        isV = true;
+                        break;
+                    }
                 }
+                
+                if (!isV) {
+                    arr->victory = temp1;
+                }
+                arr->failure = -1;
+                arr->victoryNum = 1;
             }
             
-            if (!isV) {
-                arr->victory = temp1;
+            uedArrayVector.push_back(*arr);
+        }
+        
+        adjustArrange(uedArrayVector, uedOutcomeArray, arrayMAX);
+        profit = 0.0;
+        zonggong = 0.0;
+        float uedSum = 0.0;
+        int uedPositiveArray[arrayMAX];
+        int uedNegativeArray[arrayMAX];
+        
+        for (auto i = 0; i < arrayMAX; ++i) {
+            uedPositiveArray[i] = 0;
+            uedNegativeArray[i] = 0;
+        }
+        
+        float temp = ceilf(arrayMAX / 3.33);
+        float temp1 = arrayMAX * 0.24;
+        float temp2 = temp1 - temp;
+        temp1 = arrayMAX * 0.24 - 1;
+        
+        cout << temp2 << ", " << temp << endl;
+        
+        for (vector<floatArray>::iterator ite = uedOutcomeArray.begin() + 2;
+             ite < uedOutcomeArray.end(); ++ite) {
+            
+            if (ite->number != arrayMAX) {
+                continue;
             }
-            arr->failure = -1;
-            arr->victoryNum = 1;
-        }
-        
-        uedArrayVector.push_back(*arr);
-    }
-    
-    adjustArrange(uedArrayVector, uedOutcomeArray, arrayMAX);
-    profit = 0.0;
-    zonggong = 0.0;
-    float uedSum = 0.0;
-    int uedPositiveArray[arrayMAX];
-    int uedNegativeArray[arrayMAX];
-    
-    for (auto i = 0; i < arrayMAX; ++i) {
-        uedPositiveArray[i] = 0;
-        uedNegativeArray[i] = 0;
-    }
-    
-    float temp = ceilf(arrayMAX / 3.33);
-    float temp1 = arrayMAX * 0.24;
-    float temp2 = temp1 - temp;
-    temp1 = arrayMAX * 0.24 - 1;
-    
-    cout << temp2 << ", " << temp << endl;
-    
-    for (vector<floatArray>::iterator ite = uedOutcomeArray.begin() + 2;
-         ite < uedOutcomeArray.end(); ++ite) {
-        
-        if (ite->number != arrayMAX) {
-            continue;
-        }
-        uedSum = 0.0;
-        for (int i = 0; i < ite->number; ++i) {
-            uedSum += ite->fArray[i];
-        }
-        
-        if (temp2 < uedSum && uedSum < temp1) {
-            zonggong++;
+            uedSum = 0.0;
             for (int i = 0; i < ite->number; ++i) {
-                if (ite->fArray[i] > 0) {
-                    ++uedPositiveArray[i];
-                } else {
-                    ++uedNegativeArray[i];
+                uedSum += ite->fArray[i];
+            }
+            
+            if (temp2 < uedSum && uedSum < temp1) {
+                zonggong++;
+                for (int i = 0; i < ite->number; ++i) {
+                    if (ite->fArray[i] > 0) {
+                        ++uedPositiveArray[i];
+                    } else {
+                        ++uedNegativeArray[i];
+                    }
                 }
             }
         }
-    }
-    
-    int uedI = 0;
-    for (vector<ProbabilityArray>::iterator ite = arrayVector.begin();
-         ite != arrayVector.end(); ++ite, ++repelIte, ++uedI) {
         
-        
-      //  cout << ite->victory << "，元概率：" << chanceMap[ite->victory] << "%" << endl;
-      //  cout << ite->failure << "，元概率：" << chanceMap[ite->failure] << "%" << endl;
-        
-        if (chanceMap[ite->victory] > chanceMap[ite->failure]) {
-            chanceMap[ite->victory] = chanceMap[ite->victory] * uedPositiveArray[uedI] / zonggong;
-            chanceMap[ite->failure] = chanceMap[ite->failure] * uedNegativeArray[uedI] / zonggong;
-        } else {
-            chanceMap[ite->failure] = chanceMap[ite->failure] * uedPositiveArray[uedI] / zonggong;
-            chanceMap[ite->victory] = chanceMap[ite->victory] * uedNegativeArray[uedI] / zonggong;
+        int uedI = 0;
+        for (vector<ProbabilityArray>::iterator ite = arrayVector.begin();
+             ite != arrayVector.end(); ++ite, ++repelIte, ++uedI) {
+            
+            
+            //  cout << ite->victory << "，元概率：" << chanceMap[ite->victory] << "%" << endl;
+            //  cout << ite->failure << "，元概率：" << chanceMap[ite->failure] << "%" << endl;
+            
+            if (chanceMap[ite->victory] > chanceMap[ite->failure]) {
+                chanceMap[ite->victory] = chanceMap[ite->victory] * uedPositiveArray[uedI] / zonggong;
+                chanceMap[ite->failure] = chanceMap[ite->failure] * uedNegativeArray[uedI] / zonggong;
+            } else {
+                chanceMap[ite->failure] = chanceMap[ite->failure] * uedPositiveArray[uedI] / zonggong;
+                chanceMap[ite->victory] = chanceMap[ite->victory] * uedNegativeArray[uedI] / zonggong;
+            }
+            
+            //  cout << ite->victory << "，修正概率：" << chanceMap[ite->victory] << "%" << endl;
+            //  cout << ite->failure << "，修正概率：" << chanceMap[ite->failure] << "%" << endl;
+            //  cout << endl;
         }
         
-     //  cout << ite->victory << "，修正概率：" << chanceMap[ite->victory] << "%" << endl;
-     //  cout << ite->failure << "，修正概率：" << chanceMap[ite->failure] << "%" << endl;
-     //  cout << endl;
-    }
-    
-    
-    repelIte = repelChooseVector.begin();
-    for (vector<ProbabilityArray>::iterator ite = arrayVector.begin();
-         ite != arrayVector.end(); ++ite, ++repelIte) {
+        
+        repelIte = repelChooseVector.begin();
+        for (vector<ProbabilityArray>::iterator ite = arrayVector.begin();
+             ite != arrayVector.end(); ++ite, ++repelIte) {
             cout << ite->victory << "，概率：" << chanceMap[ite->victory] << "%" << endl;
             cout << ite->failure << "，概率：" << chanceMap[ite->failure] << "%" << endl;
-        
+            
             if (chanceMap[ite->victory] > chanceMap[ite->failure]) {
                 cout << "正，选择的概率为：" << repelIte->victory << ", " << repelIte->draw << endl;
             } else {
                 cout << "负，选择的概率为：" << repelIte->draw << ", " << repelIte->failure << endl;
             }
-        
+            
             cout << endl;
+        }
     }
-    
     
     cout << "please choose next operation " << endl;
     cout << "----------------------------------------"<< endl;
@@ -825,12 +823,12 @@ int main()
         InsertSql(ite->victory, temp11, array, true);
         cout << "odds: "<< ite->victory << ", history probablity: "
         << ((float)array[0]/array[1]) * 100 << "%" << ", adjusted probablity: "
-        << ((float)array[0]/array[1]) * chanceMap[ite->victory] << "%" << endl;
+        << ((float)array[0]/array[1]) * chanceMap[ite->victory] * 100 << "%" << endl;
        
         InsertSql(ite->failure, temp21, array, true);
         cout << "odds: "<< ite->failure << ", history probablity: "
         << ((float)array[0]/array[1]) * 100 << "%" << ", adjusted probablity: "
-        << ((float)array[0]/array[1]) * chanceMap[ite->failure] << "%" << endl;
+        << ((float)array[0]/array[1]) * chanceMap[ite->failure] * 100 << "%" << endl;
         
         cout << endl;
     }
