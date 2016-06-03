@@ -257,6 +257,8 @@ int main()
     
     map<float, float>compensateMap;
     
+
+    
     for (map<float, float>::iterator mapIte = chanceMap.begin()
          ; mapIte != chanceMap.end(); ++mapIte) {
         compensateMap.insert(make_pair(mapIte->first, 1));
@@ -341,6 +343,7 @@ int main()
         << ((float)array[0]/array[1]) * chanceMap[ite->failure] << "%" << endl << endl;
     }
     
+   // return 0;
     
     cout << endl << "---------------repel choose--------------- " << endl;
     vector<ProbabilityArray> repelChooseVector;
@@ -656,7 +659,7 @@ int main()
     cout << "    _________________________________" << endl;
     cout << "----------------------------------------"<< endl;
     cin >> isUed;
-    if (isUed){
+    if (isUed == 1){
         vector<ProbabilityArray> uedArrayVector;
         vector<AllArrangeArray> uedArrangeArray;
         vector<floatArray> uedOutcomeArray;
@@ -773,6 +776,10 @@ int main()
             }
             
             cout << endl;
+        }
+    } else {
+        if (!isUed) {
+            return 0;
         }
     }
     
