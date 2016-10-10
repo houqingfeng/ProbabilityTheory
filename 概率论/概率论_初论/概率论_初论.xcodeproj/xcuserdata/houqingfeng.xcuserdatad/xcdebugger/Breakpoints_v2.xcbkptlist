@@ -73,38 +73,6 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "&#x6982;&#x7387;&#x8bba;_&#x521d;&#x8bba;/main.cpp"
-            timestampString = "485354674.292592"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "211"
-            endingLineNumber = "211"
-            landmarkName = "main()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "&#x6982;&#x7387;&#x8bba;_&#x521d;&#x8bba;/main.cpp"
-            timestampString = "485354674.292592"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "210"
-            endingLineNumber = "210"
-            landmarkName = "main()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "../../../../../&#x767e;&#x5ea6;&#x4e91;&#x540c;&#x6b65;&#x76d8;/&#x6982;&#x7387;&#x8bba;/&#x6982;&#x7387;&#x8bba;_&#x521d;&#x8bba;/&#x6982;&#x7387;&#x8bba;_&#x521d;&#x8bba;/main.cpp"
             timestampString = "485352761.529842"
             startingColumnNumber = "9223372036854775807"
@@ -127,6 +95,22 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "299"
             endingLineNumber = "299"
+            landmarkName = "main()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "&#x6982;&#x7387;&#x8bba;_&#x521d;&#x8bba;/main.cpp"
+            timestampString = "488454624.162794"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "236"
+            endingLineNumber = "236"
             landmarkName = "main()"
             landmarkType = "7">
          </BreakpointContent>

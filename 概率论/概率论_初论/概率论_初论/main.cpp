@@ -29,7 +29,11 @@ struct ProbabilityArray{
     float willianFailureProbality;//威廉概率
     float houVictoryProbality;//hou概率
     float houFailureProbality;//hou概率
+    static float averange;
+    int location;
 };
+
+float ProbabilityArray::averange = 0.0;
 
 struct Arrange{
     int *array;
@@ -40,10 +44,16 @@ struct AllArrangeArray{
     Arrange *arrange;
 };
 
+struct test{
+    int t;
+    char *c;
+};
+
 struct floatArray{
     float *fArray;
     int number;
     bool print;
+    int location[15];
 };
 
 /**
@@ -69,6 +79,7 @@ int main()
     map<float, float>chanceMap;
     
     cout << "please input data(end with '-1'): " << endl;
+    int location = 0;
     while (1) {
         float temp1, temp2;
         int temp3; //方向1 为- ，0为+
@@ -93,6 +104,8 @@ int main()
             break;
         
         ProbabilityArray *arr = new ProbabilityArray();
+        arr->location = ++location;
+        ProbabilityArray::averange += (temp1 + temp2);
         arr->operation = temp3;
         if (temp3) {
             float sum = temp4 + temp5 + temp6;
@@ -168,27 +181,120 @@ int main()
     adjustArrange(arrayVector, outcomeArray, arrayMAX);
     // cout << "概率组合：" << arrangeArray.size() << endl;
     
+    /**
+     *  大概率 ==============>>开始
+     */
     float profit = 0.0;
     float zonggong = 0.0;
+    float sum = 2.0;
+    float money = 2.0;
+    
+    map<float, float>chanceMapTemp;
+    for (vector<ProbabilityArray>::iterator mapite = arrayVector.begin();
+         mapite != arrayVector.end(); ++mapite){
+            chanceMap.insert(make_pair(mapite->victory, 0.0));
+            chanceMap.insert(make_pair(mapite->failure, 0.0));
+            chanceMapTemp.insert(make_pair(mapite->victory, 0.0));
+            chanceMapTemp.insert(make_pair(mapite->failure, 0.0));
+    }
+    
+    for (int daI = 2; daI != arrayMAX; ++daI) {
+        sum = 1.0;
+        money = 1.0;
+        zonggong = 0.0;
+        
+        for (vector<ProbabilityArray>::iterator mapite = arrayVector.begin();
+             mapite != arrayVector.end(); ++mapite){
+            chanceMapTemp[mapite->victory] = 0.0;
+            chanceMapTemp[mapite->failure] = 0.0;
+        }
+        
+        for (vector<floatArray>::iterator ite = outcomeArray.begin() + 2;
+             ite < outcomeArray.end(); ++ite) {
+                sum = 1.0;
+                money = 1.0;
+                if (ite->number == daI) {
+                    for (int i = 0; i < ite->number; ++i) {
+                        sum *= ite->fArray[i];
+                        money *= 2;
+                    }
+                    if (sum - money > 0) {
+                        zonggong++;
+                        for (int i = 0; i < ite->number; ++i) {
+                            ++chanceMapTemp[ite->fArray[i]];
+                        }
+                    }
+                }
+            }
+        
+        for (map<float, float>::iterator mapite = chanceMap.begin(); mapite != chanceMap.end(); ++mapite) {
+            mapite->second += chanceMapTemp[mapite->first]/zonggong * 100;
+        }
+    }
+    
+    cout << "-------------大概率origin odds ------------- " << endl;// << profit << endl;
+    for (map<float, float>::iterator mapite = chanceMap.begin(); mapite != chanceMap.end(); ++mapite) {
+        cout << "odds: "<< mapite->first << ", probablity: "
+        << "数量：" << mapite->second << ", "<< (mapite->second/arrayMAX) << "%" << endl;
+        mapite->second = 100.0 - (mapite->second/arrayMAX);
+    }
+    /**
+     *  大概率 ==============>>结束
+     */
+    
+    /**
+     *  小概率 ==============>>开始
+     */
+    ProbabilityArray::averange = ProbabilityArray::averange / (arrayMAX * 2);
+    float averangeTemp = powf(ProbabilityArray::averange, arrayMAX) - pow(2, arrayMAX);
+    
+    profit = 0.0;
+    zonggong = 0.0;
+    map<float, float>chanceMap1;
+    
+    for (vector<ProbabilityArray>::iterator mapite = arrayVector.begin();
+         mapite != arrayVector.end(); ++mapite){
+        map<float, float>::iterator ite = chanceMap1.find(mapite->victory);
+        if (ite == chanceMap1.end()) {
+            chanceMap1.insert(make_pair(mapite->victory, 0.0));
+        }
+        ite = chanceMap1.find(mapite->failure);
+        if (ite == chanceMap1.end()) {
+            chanceMap1.insert(make_pair(mapite->failure, 0.0));
+        }
+    }
+    
     for (vector<floatArray>::iterator ite = outcomeArray.begin() + 2;
          ite < outcomeArray.end(); ++ite) {
-        if (ite->print) {
-            // cout << "##################################################" << endl;
-        }
         float sum = 2.0;
         float money = 2.0;
+        float averanger = 0.0;
+        sum = 0.0;
+        
+        for (int i = 0; i < ite->number; ++i) {
+            for (auto ite1 = arrayVector.begin(); ite1 != arrayVector.end(); ++ite1) {
+                if (ite1->location == ite->location[i]) {
+                    sum  += (ite1->victory + ite1->failure);
+                    break;
+                }
+            }
+        }
+        
+        averanger = sum / (ite->number * 2);
+        averangeTemp = powf(averanger, ite->number) - powf(2.0, ite->number);
+        
         sum = 1.0;
         money = 1.0;
         for (int i = 0; i < ite->number; ++i) {
             sum *= ite->fArray[i];
             money *= 2;
         }
-        if (sum - money > 0) {
+        if (sum - money < averangeTemp) {
             zonggong++;
             for (int i = 0; i < ite->number; ++i) {
-                map<float, float>::iterator mapite = chanceMap.find(ite->fArray[i]);
-                if (mapite == chanceMap.end()) {
-                    chanceMap.insert(make_pair(ite->fArray[i], 1.0));
+                map<float, float>::iterator mapite = chanceMap1.find(ite->fArray[i]);
+                if (mapite == chanceMap1.end()) {
+                    chanceMap1.insert(make_pair(ite->fArray[i], 1.0));
                 } else {
                     ++mapite->second;
                 }
@@ -197,24 +303,24 @@ int main()
         profit += sum - money;
     }
     
-    for (vector<ProbabilityArray>::iterator mapite = arrayVector.begin();
-         mapite != arrayVector.end(); ++mapite){
-        map<float, float>::iterator ite = chanceMap.find(mapite->victory);
-        if (ite == chanceMap.end()) {
-            chanceMap.insert(make_pair(mapite->victory, 0.0));
-        }
-        ite = chanceMap.find(mapite->failure);
-        if (ite == chanceMap.end()) {
-            chanceMap.insert(make_pair(mapite->failure, 0.0));
-        }
+    cout << "-------------小概率origin odds ------------- " << endl;// << profit << endl;
+    auto chanceIteT = chanceMap.begin();
+    map<float, float>queMap;
+    for (map<float, float>::iterator mapite = chanceMap1.begin(); mapite != chanceMap1.end(); ++mapite, ++chanceIteT) {
+        
+        cout << "odds: "<< mapite->first << "上炔值："<< chanceIteT->second << "%, "<< "下炔值: "
+        << ((float)mapite->second/zonggong) * 100 << "%" << "，波动范围：" << fabs(chanceIteT->second - ((float)mapite->second/zonggong) * 100) << endl;
+        queMap.insert(make_pair(mapite->first, fabs(chanceIteT->second - ((float)mapite->second/zonggong) * 100)));
+        mapite->second = ((float)mapite->second/zonggong) * 100 ;
+        chanceIteT->second = (mapite->second + chanceIteT->second) / 2;
     }
-     cout << "-------------origin odds ------------- " << endl;// << profit << endl;
-    for (map<float, float>::iterator mapite = chanceMap.begin(); mapite != chanceMap.end(); ++mapite) {
-        cout << "odds: "<< mapite->first << ", probablity: "
-             << ((float)mapite->second/zonggong) * 100 << "%" << endl;
-        mapite->second = 100.0 - ((float)mapite->second/zonggong) * 100;
-    }
+    /**
+     *  小概率 ==============>>结束
+     */
     
+    /**
+     *  威廉概率 ==============>>开始
+     */
     void WilliamOddsRevise(vector<ProbabilityArray> &arrayVector, map<float, float> &chanceMap);
     WilliamOddsRevise(arrayVector, chanceMap);
     
@@ -249,19 +355,23 @@ int main()
             x = z + chanceMap[ite->failure] + chanceMap[ite->victory] - 100;
             z = x + z;
         }
-        cout << "odds: --error--" << ", probablity: " << z << "%" << endl << endl;
+        cout << "odds: --error--" << ", probablity: " << z << "%" << endl;
+        cout << "波动范围：" << queMap[ite->victory] + queMap[ite->failure] << endl << endl;
     }
+    /**
+     *  威廉概率 ==============>>结束
+     */
+    
+    /**
+     *  补偿概率 ==============>>开始
+     */
     compensateModel = compensateModel * 1.78 - 4 * arrayMAX;
-    
     float compensateData = (-0.8316) * arrayMAX;
-    
     map<float, float>compensateMap;
-    
-
     
     for (map<float, float>::iterator mapIte = chanceMap.begin()
          ; mapIte != chanceMap.end(); ++mapIte) {
-        compensateMap.insert(make_pair(mapIte->first, 1));
+        compensateMap.insert(make_pair(mapIte->first, 0));
     }
     
     cout << "补偿上限值：" << (-0.8316) * arrayMAX << endl;
@@ -285,17 +395,22 @@ int main()
     
     zonggong = 0;
     for (vector<floatArray>::iterator ite = outcomeArray.begin(); ite < outcomeArray.end(); ++ite) {
-        if (ite->number == arrayMAX) {
+        //if (ite->number == arrayMAX)
+        {
+            compensateData = ite->number * (-0.8316);
             compensateModel = 0.0;
-            for (int i = 0; i < arrayMAX; ++i) {
+            for (int i = 0; i < ite->number; ++i) {
                 compensateModel += ite->fArray[i];
             }
             
-            compensateModel = compensateModel * 1.78 - 4 * arrayMAX;
-            if (compensateModel < compensateData + 0.5 && compensateModel > compensateData - 0.5) {
+            float temp = compensateModel;
+            compensateModel = temp * 1.77 - 4 * ite->number;
+            double compensateModel1 = temp * 1.80 - 4 * ite->number;
+    //compensateModel < compensateData && compensateData < compensateModel1
+            if (compensateModel < -0.23 * ite->number && compensateModel > compensateData) {
                 ++zonggong;
                 //cout << "-----------------model--------------------" << endl;
-                for (int i = 0; i < arrayMAX; ++i) {
+                for (int i = 0; i < ite->number; ++i) {
                     ++compensateMap[ite->fArray[i]];
                     //cout << ite->fArray[i] << " ";
                 }
@@ -309,14 +424,45 @@ int main()
     for (vector<ProbabilityArray>::iterator ite = arrayVector.begin();
          ite != arrayVector.end(); ++ite, ++i) {
         cout << "模型" << i << endl;
+        float originV = chanceMap[ite->victory], originF = chanceMap[ite->failure];
         cout << ite->victory << "，元概率：" << chanceMap[ite->victory];
         chanceMap[ite->victory] = compensateMap[ite->victory] / zonggong * chanceMap[ite->victory];
         cout << "；修正概率：" << chanceMap[ite->victory] << endl;
         cout << ite->failure << "，元概率：" << chanceMap[ite->failure];
         chanceMap[ite->failure] = compensateMap[ite->failure] / zonggong * chanceMap[ite->failure];
         cout << "；修正概率：" << chanceMap[ite->failure] << endl;
+        
+        if (originV < originF) {
+            float temp1 = originV / originF;
+            float temp2 = chanceMap[ite->victory] / chanceMap[ite->failure];
+            float temp3 =  chanceMap[ite->victory] / originV;
+            float temp4 = chanceMap[ite->failure] / originF;
+            cout << "元概率比值：" << temp1 << ", 修正概率比值：" << temp2 << endl;
+            cout << "元概率比值：" << temp3 << ", 修正概率比值：" << temp4 << endl;
+//            cout << temp3 << "：" << temp1 * temp3 << ", 修正概率比值：" << temp3 * temp2 << endl;
+//            cout << temp4 << "：" << temp1 * temp4 << ", 修正概率比值：" << temp4 * temp2 << endl;
+            if (temp1 < temp2) {
+                cout << "异常！！！！！！！！" << endl;
+            }
+        } else {
+            float temp2 = originF / originV;
+            float temp1 = chanceMap[ite->failure] / chanceMap[ite->victory];
+            float temp3 = chanceMap[ite->victory] / originV;
+            float temp4 = chanceMap[ite->failure] / originF;
+            cout << "元概率比值：" << temp2 << ", 修正概率比值：" << temp1 << endl;
+            cout << "元概率比值：" << temp3 << ", 修正概率比值：" << temp4 << endl;
+//            cout << "元概率比值：" << temp3 << ", 修正概率比值：" << temp4 << endl;
+//            cout << temp3 << "：" << temp2 * temp3 << ", 修正概率比值：" << temp3 * temp1 << endl;
+//            cout << temp4 << "：" << temp2 * temp4 << ", 修正概率比值：" << temp4 * temp1 << endl;
+            if (temp2 < temp1) {
+                cout << "异常！！！！！！！！" << endl;
+            }
+        }
         cout << endl;
     }
+    /**
+     *  补偿概率 ==============>>结束
+     */
     
     void InsertSql(float odds, int isVictory, int array[], bool isexec);
     int array[2] = {1, 1};
@@ -333,17 +479,15 @@ int main()
         InsertSql(ite->victory, 0, array, false);
         cout << "odds: "<< ite->victory << ", history probablity: "
         << ((float)array[0]/array[1]) * 100 << "%" << "(" << array[0] << "/" << array[1] << ")"
-        <<  ", adjusted probablity: "
-        << ((float)array[0]/array[1]) * chanceMap[ite->victory] << "%" << endl;
+        << ",元概率：" << chanceMap[ite->victory] << "%" << ", 数据库概率:  "
+        << ((float)array[0]/array[1]) * chanceMap[ite->victory] << "%" <<endl;
         
         InsertSql(ite->failure, 0, array, false);
         cout << "odds: "<< ite->failure << ", history probablity: "
         << ((float)array[0]/array[1]) * 100 << "%" << "(" << array[0] << "/" << array[1] << ")"
-        << ", adjusted probablity: "
+        << ",元概率：" << chanceMap[ite->failure] << "%" << ", 数据库概率:  "
         << ((float)array[0]/array[1]) * chanceMap[ite->failure] << "%" << endl << endl;
     }
-    
-   // return 0;
     
     cout << endl << "---------------repel choose--------------- " << endl;
     vector<ProbabilityArray> repelChooseVector;
@@ -472,10 +616,64 @@ int main()
         repelChooseVector.push_back(*arr);
     }
     
+    float repelAve = 0.0;
+    float minAve = 0.0;
+    float maxAve = 0.0;
     for (vector<ProbabilityArray>::iterator ite = repelChooseVector.begin();
          ite < repelChooseVector.end(); ++ite) {
         cout << ite->victory << " " << ite->draw << " " << ite->failure << endl;
+        repelAve = repelAve + ite->victory + ite->draw + ite->failure;
+        float temp1 = minAve;
+        float temp2 = maxAve;
+        minAve = ite->victory;
+        maxAve = ite->victory;
+        if (minAve > ite->draw) {
+            minAve = ite->draw;
+            if (minAve > ite->failure) {
+                minAve = ite->failure;
+            }
+        } else {
+            if (minAve > ite->failure) {
+                minAve = ite->failure;
+            }
+        }
+        
+        if (maxAve < ite->draw) {
+            maxAve = ite->draw;
+            if (maxAve < ite->failure) {
+                maxAve = ite->failure;
+            }
+        } else {
+            if (maxAve < ite->failure) {
+                maxAve = ite->failure;
+            }
+        }
+        minAve += temp1;
+        maxAve += temp2;
     }
+    repelAve = repelAve / (3 * arrayMAX);
+    minAve = minAve / arrayMAX;
+    maxAve = maxAve /arrayMAX;
+    cout << "-------------------------------" << endl;
+    float zheshitemp = repelAve;
+    float zhetemp = (minAve + maxAve) / 2;
+    cout << "最小平均：" << minAve << ", 平均值：" << repelAve << ", 最大平均值：" << maxAve << ", 最大+最小："
+    << (minAve + maxAve) / 2  << endl;
+    
+    if (zheshitemp < zhetemp) {
+        cout << ( zheshitemp + 2.25) / 2 << endl;
+        zheshitemp = ( zheshitemp + 2.25) / 2;
+    } else {
+        cout << ( zhetemp + 2.25) / 2 << endl;
+        zheshitemp = ( zhetemp + 2.25) / 2;
+    }
+    
+//    if (maxAve / 2 > minAve) {
+//        zheshitemp =  (zheshitemp + minAve) / 2;
+//        cout << ( zheshitemp + 2.25) / 2 << endl;
+//    }
+    
+    
     
     void tripleAdjustArrange(vector<ProbabilityArray> &arrayVector,
                              vector<floatArray> &outcomeArray, int max);
@@ -493,7 +691,9 @@ int main()
     float minArray[arrayMAX];
     float midProfit = 0.0;
     float midArray[arrayMAX];
-    
+    float shanxian = (zheshitemp + 0.5) * 1.78 - 4;
+    float xiaxian = (zheshitemp - 0.5) * 1.78 - 4;
+    cout << shanxian << "," << xiaxian << endl;
     for (vector<floatArray>::iterator ite = repelChoooseOutcomeArray.begin() + 3;
          ite < repelChoooseOutcomeArray.end(); ++ite) {
         
@@ -506,7 +706,8 @@ int main()
             }
             
             float temp = (float)arrayMAX;
-            if ((sqrt(temp)) < profit && profit < (arrayMAX + sqrt(temp)/arrayMAX))
+        
+            if (xiaxian * arrayMAX < profit && profit < shanxian * arrayMAX)
             {
                 ++zonggong;
                 for (int i = 0; i < ite->number; ++i) {
@@ -1090,8 +1291,10 @@ void adjustArrange(vector<ProbabilityArray> &arrayVector,
     temp1->fArray = new float();
     *temp1->fArray = arrayVector[ max-1 ].victory;
     temp1->number = 1;
+    temp1->location[0] = arrayVector[ max-1 ].location;
     temp2->fArray = new float();
     *temp2->fArray = arrayVector[ max-1 ].failure;
+    temp2->location[0] = arrayVector[ max-1 ].location;
     temp2->number = 1;
     outcomeArray.push_back(*temp1);
     outcomeArray.push_back(*temp2);
@@ -1108,6 +1311,8 @@ void adjustArrange(vector<ProbabilityArray> &arrayVector,
                 temp1->fArray = new float[2];
                 temp1->fArray[0] = arrayVector[num].victory;
                 temp1->fArray[1] = arrayVector[k1].victory;
+                temp1->location[0] = arrayVector[num].location;
+                temp1->location[1] = arrayVector[k1].location;
                 temp1->number = 2;
                 temp1->print = true;
                 outcomeArray.push_back(*temp1);
@@ -1116,6 +1321,8 @@ void adjustArrange(vector<ProbabilityArray> &arrayVector,
                 temp2->fArray = new float[2];
                 temp2->fArray[0] = arrayVector[num].victory;
                 temp2->fArray[1] = arrayVector[k1].failure;
+                temp2->location[0] = arrayVector[num].location;
+                temp2->location[1] = arrayVector[k1].location;
                 temp2->number = 2;
                 temp2->print = false;
                 outcomeArray.push_back(*temp2);
@@ -1124,6 +1331,8 @@ void adjustArrange(vector<ProbabilityArray> &arrayVector,
                 temp3->fArray = new float[2];
                 temp3->fArray[0] = arrayVector[num].failure;
                 temp3->fArray[1] = arrayVector[k1].failure;
+                temp3->location[0] = arrayVector[num].location;
+                temp3->location[1] = arrayVector[k1].location;
                 temp3->number = 2;
                 temp3->print = false;
                 outcomeArray.push_back(*temp3);
@@ -1132,6 +1341,8 @@ void adjustArrange(vector<ProbabilityArray> &arrayVector,
                 temp4->fArray = new float[2];
                 temp4->fArray[0] = arrayVector[num].failure;
                 temp4->fArray[1] = arrayVector[k1].victory;
+                temp4->location[0] = arrayVector[num].location;
+                temp4->location[1] = arrayVector[k1].location;
                 temp4->number = 2;
                 temp4->print = false;
                 outcomeArray.push_back(*temp4);
@@ -1145,20 +1356,24 @@ void adjustArrange(vector<ProbabilityArray> &arrayVector,
                         floatArray *temp = new floatArray();
                         temp->fArray = new float[outcomeArray[i].number + 1];
                         temp->fArray[0] = arrayVector[num].victory;
+                        temp->location[0] = arrayVector[num].location;
                         temp->number = outcomeArray[i].number + 1;
                         temp->print = false;
                         for (int k = 0; k < outcomeArray[i].number; ++k) {
                             temp->fArray[k + 1] = outcomeArray[i].fArray[k];
+                            temp->location[k + 1] = outcomeArray[i].location[k];
                         }
                         outcomeArray.push_back(*temp);
                     } else {
                         floatArray *temp = new floatArray();
                         temp->fArray = new float[outcomeArray[i].number + 1];
                         temp->fArray[0] = arrayVector[num].failure;
+                        temp->location[0] = arrayVector[num].location;
                         temp->number = outcomeArray[i].number + 1;
                         temp->print = false;
                         for (int k = 0; k < outcomeArray[i].number; ++k) {
                             temp->fArray[k + 1] = outcomeArray[i].fArray[k];
+                            temp->location[k + 1] = outcomeArray[i].location[k];
                         }
                         outcomeArray.push_back(*temp);
                     }
@@ -1531,20 +1746,56 @@ void tripleAdjustArrange(vector<ProbabilityArray> &arrayVector,
  1.83 1.74 1 1.88 3.20 3.65
  1.75 1.82 0 3.20 3.15 2.05
  -1
-
  */
 
+//2 2 0 1 1 2 1 1 1 1 0 2 1
 
 
+//1 0 0 2 1 2 2 0 1 2 2 1 2 1
 
+//1 1 0 0
 
-
-
-
-
-
-
-
-
-
-
+/*
+ 69.741096%
+ odds: 1.400000, probablity: 66.343040%
+ odds: 1.420000, probablity: 65.048546%
+ odds: 1.560000, probablity: 57.928802%
+ odds: 1.610000, probablity: 55.825245%
+ odds: 1.611000, probablity: 55.825245%
+ odds: 1.640000, probablity: 54.530746%
+ odds: 1.660000, probablity: 53.883492%
+ odds: 1.680000, probablity: 53.398060%
+ odds: 1.740000, probablity: 51.294498%
+ odds: 1.830000, probablity: 48.705502%
+ odds: 1.900000, probablity: 46.601944%
+ odds: 1.930000, probablity: 46.116505%
+ odds: 1.950000, probablity: 45.469254%
+ odds: 2.000000, probablity: 44.174759%
+ odds: 2.001000, probablity: 44.174759%
+ odds: 2.080000, probablity: 42.071198%
+ odds: 2.400000, probablity: 34.951458%
+ odds: 2.460000, probablity: 33.656960%
+ odds: 2.580000, probablity: 30.258900%
+ 
+ 
+ odds: 1.360000, probablity: 0.316331%
+ odds: 1.400000, probablity: 1.265322%
+ odds: 1.420000, probablity: 1.897983%
+ odds: 1.560000, probablity: 11.229734%
+ odds: 1.610000, probablity: 14.729142%
+ odds: 1.611000, probablity: 14.748913%
+ odds: 1.640000, probablity: 17.240017%
+ odds: 1.660000, probablity: 18.248320%
+ odds: 1.680000, probablity: 19.829971%
+ odds: 1.740000, probablity: 25.148279%
+ odds: 1.830000, probablity: 30.367735%
+ odds: 1.900000, probablity: 36.041912%
+ odds: 1.930000, probablity: 38.117832%
+ odds: 1.950000, probablity: 39.620403%
+ odds: 2.000000, probablity: 42.684856%
+ odds: 2.001000, probablity: 42.684856%
+ odds: 2.080000, probablity: 47.587978%
+ odds: 2.400000, probablity: 67.793594%
+ odds: 2.460000, probablity: 70.778969%
+ odds: 2.580000, probablity: 76.571770%
+*/
